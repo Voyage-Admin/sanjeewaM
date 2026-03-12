@@ -60,7 +60,8 @@ const Warehouses = () => {
       const token = JSON.parse(localStorage.getItem('user') || '{}').token;
       const headers = { Authorization: `Bearer ${token}` };
 
-      await axios.post('http://localhost:5000/api/warehouses', newWarehouse, { headers });
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.post(`${apiUrl}/api/warehouses`, newWarehouse, { headers });
 
       setIsAddModalOpen(false);
       setNewWarehouse({ name: '', location: '', description: '' });

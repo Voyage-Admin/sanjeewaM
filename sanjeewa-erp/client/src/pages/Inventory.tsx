@@ -62,9 +62,10 @@ const Inventory = () => {
       const token = JSON.parse(localStorage.getItem('user') || '{}').token;
       const headers = { Authorization: `Bearer ${token}` };
 
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const [productsRes, warehousesRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/products', { headers }),
-        axios.get('http://localhost:5000/api/warehouses', { headers })
+        axios.get(`${apiUrl}/api/products`, { headers }),
+        axios.get(`${apiUrl}/api/warehouses`, { headers })
       ]);
 
       setProducts(productsRes.data);
@@ -83,7 +84,8 @@ const Inventory = () => {
       const token = JSON.parse(localStorage.getItem('user') || '{}').token;
       const headers = { Authorization: `Bearer ${token}` };
 
-      await axios.post('http://localhost:5000/api/products', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.post(`${apiUrl}/api/products`, {
         ...newProduct,
         price: parseFloat(newProduct.price),
         stock_quantity: parseInt(newProduct.stock_quantity),

@@ -32,8 +32,8 @@ export default function Login() {
     try {
       setIsLoading(true);
       setError('');
-      // Send login request to our Express backend
-      const response = await axios.post('http://localhost:5000/api/users/login', data);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await axios.post(`${apiUrl}/api/users/login`, data);
       
       // Update global Zustand state
       login(response.data);
