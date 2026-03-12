@@ -12,12 +12,12 @@ const seedAdmin = async () => {
         // Seed Users
         const userCount = await User.count();
         if (userCount === 0) {
-            const adminPassword = await bcrypt.hash('19960327', 10);
+            const adminPassword = await bcrypt.hash('admin123', 10);
             const refPassword = await bcrypt.hash('ref123', 10);
             
             await User.bulkCreate([
-                { name: 'System Admin', email: 'admin@gmail.com', password: adminPassword, role: 'ADMIN' },
-                { name: 'Sale Ref 1', email: 'ref1@gmail.com', password: refPassword, role: 'REF' }
+                { name: 'System Admin', email: 'admin@sanjeewa.com', password: adminPassword, role: 'ADMIN' },
+                { name: 'Sale Ref 1', email: 'ref@sanjeewa.com', password: refPassword, role: 'REF' }
             ]);
             console.log('✅ Base users seeded');
         }
