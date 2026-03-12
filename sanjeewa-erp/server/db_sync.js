@@ -9,8 +9,9 @@ import InvoiceItem from './models/invoice_item.model.js';
 // Sync all defined models to the DB
 export const syncDatabase = async () => {
     try {
-        await sequelize.sync({ alter: true });
-        console.log('Database synced successfully. All models created/updated.');
+        // We use { alter: false } to avoid redundant index creation errors on some environments
+        await sequelize.sync();
+        console.log('Database synced successfully.');
     } catch (error) {
         console.error('Error syncing the database:', error);
     }

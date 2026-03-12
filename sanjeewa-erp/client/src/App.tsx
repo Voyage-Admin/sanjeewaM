@@ -4,11 +4,11 @@ import { useAuthStore } from './store/authStore';
 import Login from './pages/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import Inventory from './pages/Inventory';
+import Warehouses from './pages/Warehouses';
 
 // Placeholder Pages
-const Inventory = () => <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center text-gray-400">Inventory Module Coming Soon</div>;
 const Invoices = () => <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center text-gray-400">Invoices Module Coming Soon</div>;
-const Warehouses = () => <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center text-gray-400">Warehouses Module Coming Soon</div>;
 const Users = () => <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center text-gray-400">Users Module Coming Soon</div>;
 const Settings = () => <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 h-96 flex items-center justify-center text-gray-400">Settings Module Coming Soon</div>;
 

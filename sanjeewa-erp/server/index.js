@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import * as db from './db_sync.js'; // Imports the sync function
 import authRoutes from './routes/auth.routes.js';
+import productRoutes from './routes/product.routes.js';
+import warehouseRoutes from './routes/warehouse.routes.js';
 import { setupSwagger } from './swagger.js';
 
 dotenv.config();
@@ -23,6 +25,8 @@ app.get('/api/health', (req, res) => {
 
 // Mount Routes
 app.use('/api/users', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/warehouses', warehouseRoutes);
 
 app.listen(PORT, async () => {
   try {
