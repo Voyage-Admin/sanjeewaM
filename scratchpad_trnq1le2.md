@@ -1,0 +1,57 @@
+# Admin Dashboard Sections - Sanjeewa Motors
+
+- [x] Dashboard (Main landing page with invoice charts)
+- [x] Users
+    - All Users: View/search/edit/delete users (Name, Address, Email, Role, Credit Limit)
+    - Add New user: Form to create new users
+- [x] Warehouses
+    - All Warehouses
+    - Add New Warehouses
+- [x] Shopes
+    - All Shopes: View/search/edit/delete shops (Name, Phone, Address, Note)
+    - Add New Shop
+- [x] Supplier
+    - All Supplier
+    - Add New Supplier
+- [x] Reports
+    - Reports: Sales reports
+    - Stock Products: View stock levels
+- [x] Invoice Payment (developing)
+    - Payments
+- [x] GRN (Good Receive Note)
+    - All GRN
+    - Add New GRN
+- [x] Products
+    - All Products
+    - Add New Product
+- [x] Returns
+    - Sales Return
+    - Supplier Return
+- [x] Financial
+    - Direct Income
+    - Direct Expense
+- [x] Invoice
+    - Quotation
+    - All Invoice
+    - New Invoice
+- [x] Bin
+    - All Bin
+    - Add New Bin
+- [x] Department
+    - All Department
+    - Add New Department
+- [x] Sub Department
+    - All Sub Department
+    - Add New Sub Department
+- [x] Category
+    - All Category
+    - Add New Category
+- [x] Sub Category
+    - All Sub Category
+    - Add New Sub Category
+- [x] Rack
+    - All Rack
+    - Add New Rack
+- [x] Warehouse Transfer
+    - All Transfer
+    - New Transfer
