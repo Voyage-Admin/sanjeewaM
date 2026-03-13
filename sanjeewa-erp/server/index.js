@@ -8,6 +8,8 @@ import warehouseRoutes from './routes/warehouse.routes.js';
 import invoiceRoutes from './routes/invoice.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import userManagementRoutes from './routes/user.management.routes.js';
+import shopRoutes from './routes/shop.routes.js';
+import supplierRoutes from './routes/supplier.routes.js';
 import { setupSwagger } from './swagger.js';
 
 dotenv.config();
@@ -33,6 +35,8 @@ app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users-manage', userManagementRoutes);
+app.use('/api/shops', shopRoutes);
+app.use('/api/suppliers', supplierRoutes);
 
 app.listen(PORT, async () => {
   try {

@@ -9,6 +9,8 @@ import Warehouses from './pages/Warehouses';
 import Invoices from './pages/Invoices';
 import Users from './pages/Users';
 import Settings from './pages/Settings';
+import Shops from './pages/Shops';
+import Suppliers from './pages/Suppliers';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const user = useAuthStore((state) => state.user);
@@ -41,6 +43,8 @@ function App() {
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
         <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
+        <Route path="/shops" element={<ProtectedRoute><Shops /></ProtectedRoute>} />
+        <Route path="/suppliers" element={<ProtectedRoute><Suppliers /></ProtectedRoute>} />
         <Route path="/warehouses" element={<ProtectedRoute><Warehouses /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

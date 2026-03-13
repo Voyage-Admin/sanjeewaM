@@ -5,6 +5,8 @@ import Warehouse from './models/warehouse.model.js';
 import Product from './models/product.model.js';
 import Invoice from './models/invoice.model.js';
 import InvoiceItem from './models/invoice_item.model.js';
+import Shop from './models/shop.model.js';
+import Supplier from './models/supplier.model.js';
 
 // Sync all defined models to the DB
 export const syncDatabase = async () => {
@@ -22,5 +24,7 @@ export {
     Warehouse,
     Product,
     Invoice,
-    InvoiceItem
+    InvoiceItem,
+    Shop,
+    Supplier
 };

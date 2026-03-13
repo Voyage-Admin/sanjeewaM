@@ -9,6 +9,8 @@ import {
   Settings, 
   LogOut,
   ChevronRight,
+  Store,
+  Truck,
   X
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -23,6 +25,8 @@ const Sidebar = () => {
     { name: 'Dashboard', icon: LayoutDashboard, path: '/', roles: ['ADMIN', 'REF'] },
     { name: 'Inventory', icon: Package, path: '/inventory', roles: ['ADMIN', 'REF'] },
     { name: 'Invoices', icon: FileText, path: '/invoices', roles: ['ADMIN', 'REF'] },
+    { name: 'Shops', icon: Store, path: '/shops', roles: ['ADMIN', 'REF'] },
+    { name: 'Suppliers', icon: Truck, path: '/suppliers', roles: ['ADMIN', 'REF'] },
     { name: 'Warehouses', icon: Warehouse, path: '/warehouses', roles: ['ADMIN'] },
     { name: 'Users', icon: Users, path: '/users', roles: ['ADMIN'] },
     { name: 'Settings', icon: Settings, path: '/settings', roles: ['ADMIN', 'REF'] },
