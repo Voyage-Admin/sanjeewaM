@@ -17,7 +17,12 @@ import {
   MoreVertical,
   ChevronRight,
   Printer,
-  Trash2
+  Trash2,
+  DollarSign,
+  History,
+  CreditCard,
+  Banknote,
+  Wallet
 } from 'lucide-react';
 
 interface InvoiceItem {
@@ -38,7 +43,7 @@ interface Invoice {
   total_amount: number;
   paid_amount: number;
   discount_percentage: number;
-  status: 'PENDING' | 'PARTIAL' | 'APPROVED' | 'CANCELLED';
+  status: 'PENDING' | 'PARTIAL' | 'PAID' | 'APPROVED' | 'CANCELLED';
   due_date: string;
   createdAt: string;
   User: {
@@ -48,6 +53,14 @@ interface Invoice {
     name: string;
   };
   items: InvoiceItem[];
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  payment_method: string;
+  payment_date: string;
+  note: string;
 }
 
 interface Product {
@@ -86,6 +99,13 @@ const Invoices = () => {
   // Details Modal State
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  
+  // Payment State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
+  const [paymentNote, setPaymentNote] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -216,14 +236,63 @@ const Invoices = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'PAID':
       case 'APPROVED':
         return <span className="px-2.5 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Paid</span>;
+      case 'PARTIAL':
+        return <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold flex items-center gap-1"><Clock className="w-3 h-3"/> Partial</span>;
       case 'PENDING':
         return <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold flex items-center gap-1"><Clock className="w-3 h-3"/> Pending</span>;
       case 'CANCELLED':
         return <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Cancelled</span>;
       default:
         return <span className="px-2.5 py-1 bg-gray-50 text-gray-700 rounded-full text-xs font-bold">{status}</span>;
+    }
+  };
+
+  const fetchPayments = async (invoiceId: string) => {
+    try {
+      const token = JSON.parse(localStorage.getItem('user') || '{}').token;
+      const headers = { Authorization: `Bearer ${token}` };
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const res = await axios.get(`${apiUrl}/api/payments/invoice/${invoiceId}`, { headers });
+      setPayments(res.data);
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    }
+  };
+
+  const handleRecordPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInvoice || !paymentAmount) return;
+
+    try {
+      setIsSubmitting(true);
+      const token = JSON.parse(localStorage.getItem('user') || '{}').token;
+      const headers = { Authorization: `Bearer ${token}` };
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+      await axios.post(`${apiUrl}/api/payments`, {
+        invoice_id: selectedInvoice.id,
+        amount: Number(paymentAmount),
+        payment_method: paymentMethod,
+        note: paymentNote
+      }, { headers });
+
+      setIsPaymentModalOpen(false);
+      setPaymentAmount('');
+      setPaymentNote('');
+      fetchData(); // Refresh list
+      if (selectedInvoice) {
+          // Refresh selected invoice data if details modal is open
+          const invRes = await axios.get(`${apiUrl}/api/invoices/${selectedInvoice.id}`, { headers });
+          setSelectedInvoice(invRes.data);
+          fetchPayments(selectedInvoice.id);
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Error recording payment');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -281,7 +350,7 @@ const Invoices = () => {
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice Info</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Created By</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Amount / Balance</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
@@ -320,7 +389,8 @@ const Invoices = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900">Rs. {Number(invoice.total_amount).toLocaleString()}</span>
+                        <span className="text-sm font-bold text-gray-900">Total: Rs. {Number(invoice.total_amount).toLocaleString()}</span>
+                        <span className="text-[10px] font-bold text-orange-600">Bal: Rs. {(Number(invoice.total_amount) - Number(invoice.paid_amount)).toLocaleString()}</span>
                         {invoice.discount_percentage > 0 && (
                           <span className="text-[10px] text-green-600 font-bold">-{invoice.discount_percentage}% OFF</span>
                         )}
@@ -332,7 +402,7 @@ const Invoices = () => {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 outline-none">
                         <button 
-                          onClick={() => { setSelectedInvoice(invoice); setIsDetailsModalOpen(true); }}
+                          onClick={() => { setSelectedInvoice(invoice); setIsDetailsModalOpen(true); fetchPayments(invoice.id); }}
                           className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all"
                           title="View Details"
                         >
@@ -618,9 +688,48 @@ const Invoices = () => {
                     <span>Total</span>
                     <span>Rs. {Number(selectedInvoice.total_amount).toLocaleString()}</span>
                  </div>
-                 <div className="flex justify-between text-xs font-bold text-orange-600">
-                    <span>Paid</span>
-                    <span>Rs. {Number(selectedInvoice.paid_amount).toLocaleString()}</span>
+                  <div className="flex justify-between text-xs font-bold text-orange-600">
+                    <span>Due Balance</span>
+                    <span>Rs. {(Number(selectedInvoice.total_amount) - Number(selectedInvoice.paid_amount)).toLocaleString()}</span>
+                  </div>
+              </div>
+
+              {/* Payment History Section */}
+              <div className="space-y-4 pt-6 border-t border-gray-100">
+                 <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <History className="w-3.5 h-3.5"/> Payment History
+                    </p>
+                    {selectedInvoice.status !== 'PAID' && (
+                        <button 
+                            onClick={() => { setIsPaymentModalOpen(true); setPaymentAmount((Number(selectedInvoice.total_amount) - Number(selectedInvoice.paid_amount)).toString()); }}
+                            className="text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all"
+                        >
+                            <DollarSign className="w-3.5 h-3.5"/> 
+                            Record Payment
+                        </button>
+                    )}
+                 </div>
+                 
+                 <div className="space-y-2">
+                    {payments.length === 0 ? (
+                        <p className="text-xs text-center text-gray-400 py-4 bg-gray-50 rounded-xl">No payments recorded yet.</p>
+                    ) : (
+                        payments.map((p, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white rounded-lg text-brand-600">
+                                        <CreditCard className="w-3.5 h-3.5"/>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-900">Rs. {Number(p.amount).toLocaleString()}</p>
+                                        <p className="text-[10px] text-gray-500 uppercase font-medium">{p.payment_method} • {new Date(p.payment_date).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                                {p.note && <span className="text-[10px] text-gray-400 italic max-w-[100px] truncate">{p.note}</span>}
+                            </div>
+                        ))
+                    )}
                  </div>
               </div>
 
@@ -636,6 +745,99 @@ const Invoices = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Payment Modal */}
+      {isPaymentModalOpen && selectedInvoice && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+               <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                  <h3 className="font-bold text-gray-900 flex items-center gap-2 text-base">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                    Record Payment
+                  </h3>
+                  <button onClick={() => setIsPaymentModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400">
+                    <X className="w-5 h-5" />
+                  </button>
+               </div>
+
+               <form onSubmit={handleRecordPayment} className="p-8 space-y-6">
+                  <div className="bg-emerald-50 rounded-2xl p-4 flex items-center justify-between border border-emerald-100">
+                     <div>
+                        <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Remaining Balance</p>
+                        <p className="text-xl font-black text-emerald-700">Rs. {(Number(selectedInvoice.total_amount) - Number(selectedInvoice.paid_amount)).toLocaleString()}</p>
+                     </div>
+                     <Banknote className="w-8 h-8 text-emerald-200" />
+                  </div>
+
+                  <div className="space-y-4">
+                     <div className="space-y-1.5">
+                        <label className="text-sm font-bold text-gray-700 ml-1">Payment Amount</label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rs.</span>
+                            <input 
+                                type="number"
+                                step="0.01"
+                                required
+                                autoFocus
+                                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-brand-500 outline-none font-bold text-lg"
+                                value={paymentAmount}
+                                onChange={e => setPaymentAmount(e.target.value)}
+                            />
+                        </div>
+                     </div>
+
+                     <div className="space-y-1.5">
+                        <label className="text-sm font-bold text-gray-700 ml-1">Payment Method</label>
+                        <div className="grid grid-cols-2 gap-2">
+                           {['CASH', 'CARD', 'CHEQUE', 'TRANSFER'].map(method => (
+                              <button
+                                key={method}
+                                type="button"
+                                onClick={() => setPaymentMethod(method)}
+                                className={`py-2.5 rounded-xl border font-bold text-xs transition-all ${
+                                    paymentMethod === method 
+                                    ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-100' 
+                                    : 'bg-white border-gray-200 text-gray-500 hover:border-brand-200'
+                                }`}
+                              >
+                                 {method}
+                              </button>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="space-y-1.5">
+                        <label className="text-sm font-bold text-gray-700 ml-1">Note (Optional)</label>
+                        <input 
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                            placeholder="Bank reference, cheque number etc."
+                            value={paymentNote}
+                            onChange={e => setPaymentNote(e.target.value)}
+                        />
+                     </div>
+                  </div>
+
+                  <div className="pt-2 flex gap-3">
+                     <button 
+                        type="button"
+                        onClick={() => setIsPaymentModalOpen(false)}
+                        className="flex-1 py-3.5 rounded-2xl border border-gray-100 font-bold text-gray-500 hover:bg-gray-50 transition-all"
+                     >
+                        Cancel
+                     </button>
+                     <button 
+                        type="submit"
+                        disabled={isSubmitting || !paymentAmount}
+                        className="flex-1 py-3.5 rounded-2xl bg-emerald-600 text-white font-black hover:bg-emerald-700 shadow-xl shadow-emerald-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                     >
+                        {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wallet className="w-5 h-5" />}
+                        Record Rs. {Number(paymentAmount || 0).toLocaleString()}
+                     </button>
+                  </div>
+               </form>
+            </div>
+          </div>
       )}
     </div>
   );

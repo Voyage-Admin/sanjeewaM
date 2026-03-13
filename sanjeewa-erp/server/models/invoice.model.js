@@ -27,7 +27,7 @@ const Invoice = sequelize.define('Invoice', {
         defaultValue: 0.00,
     },
     status: {
-        type: DataTypes.ENUM('PENDING', 'PARTIAL', 'APPROVED', 'CANCELLED'),
+        type: DataTypes.ENUM('PENDING', 'PARTIAL', 'PAID', 'APPROVED', 'CANCELLED'),
         defaultValue: 'PENDING',
     },
     due_date: {

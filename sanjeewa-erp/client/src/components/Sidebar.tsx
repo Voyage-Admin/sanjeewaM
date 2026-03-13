@@ -13,6 +13,8 @@ import {
   Truck,
   Database,
   FilePlus,
+  RotateCcw,
+  BarChart3,
   X
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -30,6 +32,8 @@ const Sidebar = () => {
     { name: 'Shops', icon: Store, path: '/shops', roles: ['ADMIN', 'REF'] },
     { name: 'Suppliers', icon: Truck, path: '/suppliers', roles: ['ADMIN', 'REF'] },
     { name: 'GRN Logs', icon: FilePlus, path: '/grns', roles: ['ADMIN', 'REF'] },
+    { name: 'Returns', icon: RotateCcw, path: '/returns', roles: ['ADMIN', 'REF'] },
+    { name: 'Financials', icon: BarChart3, path: '/financials', roles: ['ADMIN'] },
     { name: 'Org Master', icon: Database, path: '/master-data', roles: ['ADMIN'] },
     { name: 'Warehouses', icon: Warehouse, path: '/warehouses', roles: ['ADMIN'] },
     { name: 'Users', icon: Users, path: '/users', roles: ['ADMIN'] },

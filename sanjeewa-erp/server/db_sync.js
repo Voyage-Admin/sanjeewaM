@@ -13,6 +13,12 @@ import Bin from './models/bin.model.js';
 import Rack from './models/rack.model.js';
 import GRN from './models/grn.model.js';
 import GRNItem from './models/grn_item.model.js';
+import Payment from './models/payment.model.js';
+import SalesReturn from './models/sales_return.model.js';
+import SalesReturnItem from './models/sales_return_item.model.js';
+import SupplierReturn from './models/supplier_return.model.js';
+import SupplierReturnItem from './models/supplier_return_item.model.js';
+import FinancialEntry from './models/financial_entry.model.js';
 
 // Sync all defined models to the DB
 export const syncDatabase = async () => {
@@ -34,6 +40,12 @@ export const syncDatabase = async () => {
         await Rack.sync({ alter: true });
         await GRN.sync({ alter: true });
         await GRNItem.sync({ alter: true });
+        await Payment.sync({ alter: true });
+        await SalesReturn.sync({ alter: true });
+        await SalesReturnItem.sync({ alter: true });
+        await SupplierReturn.sync({ alter: true });
+        await SupplierReturnItem.sync({ alter: true });
+        await FinancialEntry.sync({ alter: true });
         
         console.log('Database synced successfully');
     } catch (error) {
@@ -56,5 +68,11 @@ export {
     Bin,
     Rack,
     GRN,
-    GRNItem
+    GRNItem,
+    Payment,
+    SalesReturn,
+    SalesReturnItem,
+    SupplierReturn,
+    SupplierReturnItem,
+    FinancialEntry
 };

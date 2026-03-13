@@ -12,6 +12,9 @@ import shopRoutes from './routes/shop.routes.js';
 import supplierRoutes from './routes/supplier.routes.js';
 import masterRoutes from './routes/master.routes.js';
 import grnRoutes from './routes/grn.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
+import returnRoutes from './routes/return.routes.js';
+import financialRoutes from './routes/financial.routes.js';
 import { setupSwagger } from './swagger.js';
 
 dotenv.config();
@@ -41,6 +44,9 @@ app.use('/api/shops', shopRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/grns', grnRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/returns', returnRoutes);
+app.use('/api/financials', financialRoutes);
 
 app.listen(PORT, async () => {
   try {
