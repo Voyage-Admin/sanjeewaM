@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   Warehouse as WarehouseIcon, 
@@ -23,12 +24,17 @@ interface Warehouse {
 }
 
 const Warehouses = () => {
+  const navigate = useNavigate();
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
   const [newWarehouse, setNewWarehouse] = useState({
     name: '',
     location: '',
@@ -64,7 +70,7 @@ const Warehouses = () => {
       await axios.post(`${apiUrl}/api/warehouses`, newWarehouse, { headers });
 
       setIsAddModalOpen(false);
-      setNewWarehouse({ name: '', location: '', description: '' });
+      resetForm();
       fetchWarehouses();
     } catch (error) {
       console.error('Error adding warehouse:', error);
@@ -72,6 +78,71 @@ const Warehouses = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleUpdateWarehouse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedWarehouse) return;
+
+    try {
+      setIsSubmitting(true);
+      const token = JSON.parse(localStorage.getItem('user') || '{}').token;
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.put(`${apiUrl}/api/warehouses/${selectedWarehouse.id}`, newWarehouse, { headers });
+
+      setIsEditModalOpen(false);
+      resetForm();
+      fetchWarehouses();
+    } catch (error) {
+      console.error('Error updating warehouse:', error);
+      alert('Error updating warehouse.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteWarehouse = async () => {
+    if (!selectedWarehouse) return;
+
+    try {
+      setIsSubmitting(true);
+      const token = JSON.parse(localStorage.getItem('user') || '{}').token;
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.delete(`${apiUrl}/api/warehouses/${selectedWarehouse.id}`, { headers });
+
+      setIsDeleteModalOpen(false);
+      setSelectedWarehouse(null);
+      fetchWarehouses();
+    } catch (error) {
+      console.error('Error deleting warehouse:', error);
+      alert('Error deleting warehouse. Make sure it has no products associated.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setNewWarehouse({ name: '', location: '', description: '' });
+    setSelectedWarehouse(null);
+  };
+
+  const openEditModal = (warehouse: Warehouse) => {
+    setSelectedWarehouse(warehouse);
+    setNewWarehouse({
+      name: warehouse.name,
+      location: warehouse.location,
+      description: warehouse.description
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const openDeleteModal = (warehouse: Warehouse) => {
+    setSelectedWarehouse(warehouse);
+    setIsDeleteModalOpen(true);
   };
 
   return (
@@ -120,10 +191,16 @@ const Warehouses = () => {
                             <Building2 className="w-6 h-6" />
                         </div>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-1.5 text-gray-400 hover:text-brand-600 rounded-lg">
+                            <button 
+                                onClick={() => openEditModal(warehouse)}
+                                className="p-1.5 text-gray-400 hover:text-brand-600 rounded-lg"
+                            >
                                 <Edit className="w-4 h-4" />
                             </button>
-                            <button className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg">
+                            <button 
+                                onClick={() => openDeleteModal(warehouse)}
+                                className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg"
+                            >
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
@@ -143,7 +220,10 @@ const Warehouses = () => {
                             <Package className="w-4 h-4" />
                             {warehouse.Products?.length || 0} Products
                         </div>
-                        <button className="text-xs font-bold text-gray-400 hover:text-brand-600 uppercase tracking-wider">
+                        <button 
+                            onClick={() => navigate('/inventory', { state: { filterWarehouse: warehouse.name } })}
+                            className="text-xs font-bold text-gray-400 hover:text-brand-600 uppercase tracking-wider"
+                        >
                             Manage Stock
                         </button>
                     </div>
@@ -155,24 +235,24 @@ const Warehouses = () => {
         )}
       </div>
 
-      {/* Add Warehouse Modal */}
-      {isAddModalOpen && (
+      {/* Add/Edit Warehouse Modal */}
+      {(isAddModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-brand-600" />
-                Add New Location
+                {isEditModalOpen ? <Edit className="w-5 h-5 text-brand-600" /> : <Plus className="w-5 h-5 text-brand-600" />}
+                {isEditModalOpen ? 'Edit Location' : 'Add New Location'}
               </h2>
               <button 
-                onClick={() => setIsAddModalOpen(false)}
+                onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); resetForm(); }}
                 className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddWarehouse} className="p-6 space-y-4 text-left">
+            <form onSubmit={isEditModalOpen ? handleUpdateWarehouse : handleAddWarehouse} className="p-6 space-y-4 text-left">
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-gray-700 ml-1">Location Name</label>
                 <input 
@@ -214,7 +294,7 @@ const Warehouses = () => {
               <div className="pt-4 flex gap-3">
                 <button 
                   type="button"
-                  onClick={() => setIsAddModalOpen(false)}
+                  onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); resetForm(); }}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all active:scale-95"
                 >
                   Cancel
@@ -230,11 +310,45 @@ const Warehouses = () => {
                       Processing...
                     </>
                   ) : (
-                    'Add Location'
+                    isEditModalOpen ? 'Update Location' : 'Add Location'
                   )}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && selectedWarehouse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center text-red-600">
+                <Trash2 className="w-8 h-8" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Delete Location</h2>
+                <p className="text-gray-500 mt-2">
+                  Are you sure you want to delete <span className="font-bold text-gray-900">{selectedWarehouse.name}</span>? All products in this location will become unassigned.
+                </p>
+              </div>
+              <div className="flex w-full gap-3 mt-2">
+                <button 
+                  onClick={() => { setIsDeleteModalOpen(false); setSelectedWarehouse(null); }}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteWarehouse}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Delete'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
