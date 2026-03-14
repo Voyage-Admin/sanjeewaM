@@ -3,6 +3,7 @@ import InvoiceItem from '../models/invoice_item.model.js';
 import Product from '../models/product.model.js';
 import User from '../models/user.model.js';
 import Warehouse from '../models/warehouse.model.js';
+import FinancialEntry from '../models/financial_entry.model.js';
 import sequelize from '../config/database.js';
 
 export const getAllInvoices = async (req, res) => {
@@ -103,6 +104,17 @@ export const createInvoice = async (req, res) => {
                 invoice_id: invoice.id
             }, { transaction: t });
         }
+
+        // Create linked Financial Entry (Revenue Recognition)
+        await FinancialEntry.create({
+            type: 'INCOME',
+            category: 'Sales',
+            amount: invoice.total_amount,
+            description: `Sales from Invoice ${invoice.invoice_number}`,
+            reference_number: invoice.invoice_number,
+            invoice_id: invoice.id,
+            entry_date: new Date()
+        }, { transaction: t });
 
         await t.commit();
         res.status(201).json(invoice);

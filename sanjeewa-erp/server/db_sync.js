@@ -19,6 +19,21 @@ import SalesReturnItem from './models/sales_return_item.model.js';
 import SupplierReturn from './models/supplier_return.model.js';
 import SupplierReturnItem from './models/supplier_return_item.model.js';
 import FinancialEntry from './models/financial_entry.model.js';
+import sequelize from './config/database.js';
+
+// Financial Entry Associations
+FinancialEntry.belongsTo(Invoice, { foreignKey: 'invoice_id' });
+FinancialEntry.belongsTo(GRN, { foreignKey: 'grn_id' });
+FinancialEntry.belongsTo(Payment, { foreignKey: 'payment_id' });
+FinancialEntry.belongsTo(SalesReturn, { foreignKey: 'sales_return_id' });
+FinancialEntry.belongsTo(SupplierReturn, { foreignKey: 'supplier_return_id' });
+
+Invoice.hasMany(FinancialEntry, { foreignKey: 'invoice_id' });
+GRN.hasMany(FinancialEntry, { foreignKey: 'grn_id' });
+Payment.hasOne(FinancialEntry, { foreignKey: 'payment_id' });
+SalesReturn.hasOne(FinancialEntry, { foreignKey: 'sales_return_id' });
+SupplierReturn.hasOne(FinancialEntry, { foreignKey: 'supplier_return_id' });
+
 
 // Sync all defined models to the DB
 export const syncDatabase = async () => {
@@ -74,5 +89,7 @@ export {
     SalesReturnItem,
     SupplierReturn,
     SupplierReturnItem,
-    FinancialEntry
+    FinancialEntry,
+    sequelize
 };
+

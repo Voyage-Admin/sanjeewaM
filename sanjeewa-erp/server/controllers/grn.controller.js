@@ -1,5 +1,5 @@
 import sequelize from '../config/database.js';
-import { GRN, GRNItem, Product, Supplier, Warehouse } from '../db_sync.js';
+import { GRN, GRNItem, Product, Supplier, Warehouse, FinancialEntry } from '../db_sync.js';
 
 export const getAllGRNs = async (req, res) => {
     try {
@@ -65,6 +65,17 @@ export const createGRN = async (req, res) => {
                 await product.save({ transaction: t });
             }
         }
+
+        // Create linked Financial Entry
+        await FinancialEntry.create({
+            type: 'EXPENSE',
+            category: 'Purchase',
+            amount: grn.total_amount,
+            description: `Purchase from GRN ${grn.grn_number}`,
+            reference_number: grn.grn_number,
+            grn_id: grn.id,
+            entry_date: grn.receive_date
+        }, { transaction: t });
 
         await t.commit();
         res.status(201).json(grn);

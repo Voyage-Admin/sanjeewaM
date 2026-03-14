@@ -34,7 +34,29 @@ const FinancialEntry = sequelize.define('FinancialEntry', {
     reference_number: {
         type: DataTypes.STRING,
         allowNull: true,
+    },
+    // Linkages
+    invoice_id: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
+    grn_id: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
+    payment_id: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
+    sales_return_id: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
+    supplier_return_id: {
+        type: DataTypes.UUID,
+        allowNull: true
     }
+
 }, {
     timestamps: true,
     tableName: 'financial_entries'

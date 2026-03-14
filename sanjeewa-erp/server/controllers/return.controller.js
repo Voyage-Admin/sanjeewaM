@@ -6,7 +6,8 @@ import {
     SupplierReturnItem, 
     Invoice, 
     GRN, 
-    Product 
+    Product,
+    FinancialEntry
 } from '../db_sync.js';
 
 // --- Sales Returns ---
@@ -51,6 +52,18 @@ export const createSalesReturn = async (req, res) => {
                 await product.save({ transaction: t });
             }
         }
+
+        // Create linked Financial Entry (Expense/Refund)
+        await FinancialEntry.create({
+            type: 'EXPENSE',
+            category: 'Sales Return',
+            amount: salesReturn.total_refund_amount,
+            description: `Refund for Sales Return ${salesReturn.return_number}`,
+            reference_number: salesReturn.return_number,
+            sales_return_id: salesReturn.id,
+            invoice_id: invoice_id,
+            entry_date: new Date()
+        }, { transaction: t });
 
         await t.commit();
         res.status(201).json(salesReturn);
@@ -105,6 +118,18 @@ export const createSupplierReturn = async (req, res) => {
                 await product.save({ transaction: t });
             }
         }
+
+        // Create linked Financial Entry (Income/Credit)
+        await FinancialEntry.create({
+            type: 'INCOME',
+            category: 'Supplier Return',
+            amount: supplierReturn.total_credit_amount,
+            description: `Credit from Supplier Return ${supplierReturn.return_number}`,
+            reference_number: supplierReturn.return_number,
+            supplier_return_id: supplierReturn.id,
+            grn_id: grn_id,
+            entry_date: new Date()
+        }, { transaction: t });
 
         await t.commit();
         res.status(201).json(supplierReturn);

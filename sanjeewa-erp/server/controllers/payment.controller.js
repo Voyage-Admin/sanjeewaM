@@ -1,5 +1,5 @@
 import sequelize from '../config/database.js';
-import { Payment, Invoice } from '../db_sync.js';
+import { Payment, Invoice, FinancialEntry } from '../db_sync.js';
 
 export const createPayment = async (req, res) => {
     const t = await sequelize.transaction();
@@ -32,6 +32,20 @@ export const createPayment = async (req, res) => {
         }
 
         await invoice.save({ transaction: t });
+        
+        // Create linked Financial Entry
+        await FinancialEntry.create({
+            type: 'INCOME',
+            category: 'Sales Payment',
+            amount: amount,
+            description: `Payment for Invoice ${invoice.invoice_number}`,
+            reference_number: invoice.invoice_number,
+            invoice_id: invoice.id,
+            payment_id: payment.id,
+            payment_method: payment_method,
+            entry_date: payment_date || new Date()
+        }, { transaction: t });
+
         await t.commit();
 
         res.status(201).json(payment);
